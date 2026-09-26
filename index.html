@@ -407,6 +407,20 @@ a { color: inherit; text-decoration: none; }
 .hero__bg {
   position: absolute;
   inset: 0;
+  will-change: opacity;
+}
+/* 아래쪽 가장자리를 바탕색으로 서서히 녹여서 다음 섹션과 끊김 없이 이어지게 합니다 */
+.hero__bg::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 45%;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--bg) 0%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 35%, transparent) 35%,
+    color-mix(in srgb, var(--bg) 75%, transparent) 70%,
+    var(--bg) 100%);
+  pointer-events: none;
 }
 /* 은은한 파스텔 빛 */
 .blob {
@@ -1471,7 +1485,7 @@ a { color: inherit; text-decoration: none; }
     return clamp((innerHeight - r.top) / (innerHeight + r.height));
   };
 
-  const hero = $("#hero"), heroContent = $("#heroContent"), blobs = $$(".blob, .shape");
+  const hero = $("#hero"), heroContent = $("#heroContent"), heroBg = $(".hero__bg"), scrollHint = $(".scroll-hint"), blobs = $$(".blob, .shape");
   const words = $$(".intro__text .word"), intro = $("#intro");
   const hSec = $("#features"), hTrack = $("#hTrack"), hBar = $("#hBar");
   const stepSec = $("#steps"), stepItems = $$(".step"), stepImgs = $$("#stepVisual .ph-box"),
@@ -1504,6 +1518,9 @@ a { color: inherit; text-decoration: none; }
     const hp = pinProgress(hero);
     heroContent.style.transform = `translateY(${hp * -80}px) scale(${1 - hp * 0.3})`;
     heroContent.style.opacity = 1 - hp * 1.4;
+    // 히어로가 화면을 벗어나기 전에 배경도 서서히 사라지게 해서 경계선이 보이지 않게 함
+    heroBg.style.opacity = 1 - 0.5 * clamp((hp - 0.4) / 0.6);
+    scrollHint.style.opacity = 1 - clamp(hp * 6);
     blobs.forEach(b => {
       const s = +b.dataset.speed * (isMobile ? 0.5 : 1);
       b.style.transform = `translate(${hp * 200 * s}px, ${hp * 300 * s}px) scale(${1 + hp * 0.5})`;
